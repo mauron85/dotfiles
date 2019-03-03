@@ -1,0 +1,90 @@
+function mkcd() {
+    # make a directory and cd into it
+    # mkcd /tmp/some_directory
+    mkdir -p "$*"
+    cd "$*"
+}
+
+function cd-to-finder() {
+    target=`osascript -e 'tell application "Finder" to if (count of Finder windows) > 0 then get POSIX path of (target of front Finder window as text)'`
+    if [ "$target" != "" ]; then
+	cd "$target"; pwd
+    else
+	echo 'No Finder window found' >&2
+    fi
+}
+
+# Retries a command a with backoff.
+#
+# The retry count is given by ATTEMPTS (default 5), the
+# initial backoff timeout is given by TIMEOUT in seconds
+# (default 1.)
+#
+# Successive backoffs double the timeout.
+#
+# Beware of set -e killing your whole script!
+#
+# https://coderwall.com/p/--eiqg/exponential-backoff-in-bash
+function with_backoff {
+  local max_attempts=${ATTEMPTS-5}
+  local timeout=${TIMEOUT-1}
+  local attempt=0
+  local exitCode=0
+
+  while [[ $attempt < $max_attempts ]]
+  do
+    "$@"
+    exitCode=$?
+
+    if [[ $exitCode == 0 ]]
+    then
+      break
+    fi
+
+    echo "Failure! Retrying in $timeout.." 1>&2
+    sleep $timeout
+    attempt=$(( attempt + 1 ))
+    timeout=$(( timeout * 2 ))
+  done
+
+  if [[ $exitCode != 0 ]]
+  then
+    echo "You've failed me for the last time! ($@)" 1>&2
+  fi
+
+  return $exitCode
+}
+
+urldecode() {
+    # urldecode <string>
+
+    local url_encoded="${1//+/ }"
+    printf '%b' "${url_encoded//%/\\x}"
+}
+
+#https://stackoverflow.com/a/26500519/3896616
+resume() {
+    local url=${1:?"Error: Missing url"}
+    local file=${2}
+
+    # try to detect file name from http headers
+    if [[ -z "$file" ]]; then
+        local header="$(curl -sI "$url" | tr -d '\r')"
+        file="$(echo "$header" | sed -nE "s/.*filename.?=(.*'')?(.*)$/\2/p")"
+        if [[ -z "$file" ]]; then
+            file="$(echo "$header" | grep -o -E 'Location:.*$')"
+            if [[ -n "$file" ]]; then
+                file=$(basename "${file#Location\:}")
+            fi
+            file=$(urldecode $file)
+        fi
+    fi
+
+    # fallback to filename from url
+    if [[ -z "$file" ]]; then
+        file="$(basename $1 | cut -d \? -f 1)"
+        file=$(urldecode $file)
+    fi
+
+    (ATTEMPTS=99 with_backoff curl --speed-limit 0 --speed-limit 60 -C - -o "$file" "$url")
+}
