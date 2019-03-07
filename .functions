@@ -62,7 +62,9 @@ urldecode() {
     printf '%b' "${url_encoded//%/\\x}"
 }
 
-#https://stackoverflow.com/a/26500519/3896616
+
+# Resume file download
+# https://stackoverflow.com/a/26500519/3896616
 resume() {
     local url=${1:?"Error: Missing url"}
     local file=${2}
@@ -88,3 +90,15 @@ resume() {
 
     (ATTEMPTS=99 with_backoff curl --speed-limit 0 --speed-limit 60 -C - -o "$file" "$url")
 }
+
+
+pipefrom() {
+    local key=${1:?"Error: Missing pipe key"};
+    curl -s https://pipeto.me/$key;
+}
+
+pipeto() {
+    local key=${1:?"Error: Missing pipe key"};
+    curl -T- -s https://pipeto.me/$key;
+}
+
