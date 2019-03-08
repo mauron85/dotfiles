@@ -120,3 +120,9 @@ ppaste() {
     cat | curl -T- -s https://pipeto.me/$key
 }
 
+
+# Expose local servers to the internet
+serveo() {
+    local port=${1:?"Error: Missing port"};
+    ssh -R 80:localhost:$port serveo.net
+}
