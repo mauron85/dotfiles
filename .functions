@@ -107,3 +107,16 @@ pipeto() {
     curl -T- -s https://pipeto.me/$key;
 }
 
+ppcopy() {
+    local key=${PIPETO_ME_KEY:?"Env variable PIPETO_ME_KEY not set"};
+    pipefrom $key
+}
+
+
+# Pipe standard input to pipeto.me
+# Example: tail -f /var/log/system.log | ppaste
+ppaste() {
+    local key=${PIPETO_ME_KEY:?"Env variable PIPETO_ME_KEY not set"};
+    cat | curl -T- -s https://pipeto.me/$key
+}
+
