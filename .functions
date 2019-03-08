@@ -91,6 +91,11 @@ resume() {
     (ATTEMPTS=99 with_backoff curl --speed-limit 0 --speed-limit 60 -C - -o "$file" "$url")
 }
 
+# Generate random string with optional length as argument
+rand() {
+    local len=${1:-10};
+    date +%s | shasum | base64 | head -c "$len" ; echo
+}
 
 pipefrom() {
     local key=${1:?"Error: Missing pipe key"};
