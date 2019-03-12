@@ -1,0 +1,4 @@
+alias pbcopy='xsel --clipboard --input'
+alias pbpaste='xsel --clipboard --output'
+alias ipconfig='ip address show'
+alias suspend='systemd-run --on-active=30 systemctl suspend'
