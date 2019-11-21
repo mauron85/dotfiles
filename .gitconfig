@@ -1,0 +1,10 @@
+# This is Git's per-user configuration file.
+[user]
+# Please adapt and uncomment the following lines:
+	name = Marian Hello
+	email = m.hello@gmail.com
+
+[alias]
+	glog = log --all --pretty='format:%d %Cgreen%h%Creset %an - %s' --graph
+[core]
+	excludesfile = ~/.gitignore
