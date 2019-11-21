@@ -5,3 +5,4 @@ alias randmac='echo ifconfig en0 ether $(openssl rand -hex 6 | sed "s/\(..\)/\1:
 alias tmux='tmux attach || tmux new-session'
 alias server='$DOT_FILES_DIR/bin/server'
 alias cdf='cd-to-finder'
+alias yarn='yarn --prefer-offline'
